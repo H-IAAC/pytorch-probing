@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import Dict
 
 import torch
 
@@ -6,7 +6,7 @@ from .interceptor_base import InterceptorBase
 from .interceptor_layer import InterceptorLayer
 
 class Interceptor(InterceptorBase):
-    def __init__(self, module, intercept_paths) -> None:
+    def __init__(self, module, intercept_paths, detach=True) -> None:
         super().__init__(module, ["_intercept_paths", "_interceptor_layers"])
 
         self._intercept_paths = intercept_paths
@@ -17,7 +17,7 @@ class Interceptor(InterceptorBase):
             parent = self.get_submodule_parent(path)
             name = path.split("/")[-1]
 
-            interceptor_layer = InterceptorLayer(submodule)
+            interceptor_layer = InterceptorLayer(submodule, detach)
             self._interceptor_layers[path] = interceptor_layer
 
             parent._modules[name] = interceptor_layer

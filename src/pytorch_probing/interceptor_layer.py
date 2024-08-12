@@ -6,10 +6,11 @@ from .interceptor_base import InterceptorBase
 
 
 class InterceptorLayer(InterceptorBase):
-    def __init__(self, module) -> None:
-        super().__init__(module, ["_intercepted_output"])
+    def __init__(self, module, detach=True) -> None:
+        super().__init__(module, ["_intercepted_output", "_detach"])
 
         self._intercepted_output : None | torch.Tensor | List[torch.Tensor] = None
+        self._detach = detach
 
     @property
     def output(self) -> None | torch.Tensor | List[torch.Tensor]:
@@ -22,9 +23,14 @@ class InterceptorLayer(InterceptorBase):
             self._intercepted_output = []
 
             for output in outputs:
-                self._intercepted_output.append(output.copy())
+                if self._detach:
+                    output = output.detach()
+
+                self._intercepted_output.append(output.clone())
         else:  
-            self._intercepted_output = outputs.detach().clone()
+            if self._detach:
+                outputs = outputs.detach()
+            self._intercepted_output = outputs.clone()
 
         return outputs
     
