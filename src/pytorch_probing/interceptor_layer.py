@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 
 import torch
 
@@ -39,3 +39,9 @@ class InterceptorLayer(InterceptorBase):
 
     def reduce(self):
         return self._module
+    
+    def __getstate__(self) -> Dict[str, Any]:
+        state = super().__getstate__()
+        state["_intercepted_output"] = None
+
+        return state

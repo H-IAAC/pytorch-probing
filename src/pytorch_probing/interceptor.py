@@ -13,9 +13,14 @@ class Interceptor(InterceptorBase):
 
         self._interceptor_layers : Dict[str, InterceptorLayer] = {}
         for path in intercept_paths:
-            submodule = self.get_submodule(path)
-            parent = self.get_submodule_parent(path)
-            name = path.split("/")[-1]
+            try:
+                submodule = self.get_submodule(path)
+                parent = self.get_submodule_parent(path)
+            except KeyError:
+                self.reduce()
+                raise ValueError(f"There is no module with path '{path}'.") from None
+            
+            name = path.split(".")[-1]
 
             interceptor_layer = InterceptorLayer(submodule, detach)
             self._interceptor_layers[path] = interceptor_layer
@@ -27,8 +32,11 @@ class Interceptor(InterceptorBase):
         
     def reduce(self) -> torch.nn.Module:
         for path in self._intercept_paths:
+            if path not in self._interceptor_layers:
+                continue
+
             parent = self.get_submodule_parent(path)
-            name = path.split("/")[-1]
+            name = path.split(".")[-1]
             interceptor_layer = self._interceptor_layers[path]
 
             parent._modules[name] = interceptor_layer.reduce()
@@ -52,7 +60,7 @@ class Interceptor(InterceptorBase):
         if path == "":
             return module
 
-        path_parts = path.split("/")
+        path_parts = path.split(".")
 
         for part in path_parts:
             module = module._modules[part]
@@ -60,8 +68,8 @@ class Interceptor(InterceptorBase):
         return module
 
     def get_submodule_parent(self, path:str):
-        path_parts = path.split("/")
+        path_parts = path.split(".")
         path_parts = path_parts[:-1]
-        path = "/".join(path_parts)
+        path = ".".join(path_parts)
 
         return self.get_submodule(path)
