@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import torch
 
@@ -28,9 +28,12 @@ class Interceptor(InterceptorBase):
             parent._modules[name] = interceptor_layer
 
     def forward(self, *args, **kwargs):
+        self.check_reduced()
         return self._module(*args, **kwargs)
         
     def reduce(self) -> torch.nn.Module:
+        super().reduce()
+
         for path in self._intercept_paths:
             if path not in self._interceptor_layers:
                 continue
@@ -44,7 +47,7 @@ class Interceptor(InterceptorBase):
         return self._module
     
     @property
-    def outputs(self):
+    def outputs(self) -> Dict[str, torch.Tensor | List[torch.Tensor]]:
         outputs = {}
         for path in self._intercept_paths:
             outputs[path] = self._interceptor_layers[path].output
@@ -73,3 +76,9 @@ class Interceptor(InterceptorBase):
         path = ".".join(path_parts)
 
         return self.get_submodule(path)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.reduce()

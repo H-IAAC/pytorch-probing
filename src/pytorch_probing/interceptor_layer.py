@@ -17,6 +17,8 @@ class InterceptorLayer(InterceptorBase):
         return self._intercepted_output
 
     def forward(self, *args, **kwargs):
+        self.check_reduced()
+
         outputs : Tuple[torch.Tensor] | torch.Tensor = self._module(*args, **kwargs)
         
         if isinstance(outputs, tuple):
@@ -38,6 +40,7 @@ class InterceptorLayer(InterceptorBase):
         self._intercepted_output = None
 
     def reduce(self):
+        super().reduce()
         return self._module
     
     def __getstate__(self) -> Dict[str, Any]:
