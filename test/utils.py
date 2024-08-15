@@ -7,6 +7,8 @@ class TestModel(torch.nn.Module):
     def __init__(self, input_size, hidden_size, output_size, n_hidden=0):
         super().__init__()
 
+        self.dummy_attribute = 0
+
         self.linear1 = torch.nn.Linear(input_size, hidden_size)
         self.relu = torch.nn.ReLU()
 
