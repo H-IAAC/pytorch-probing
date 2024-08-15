@@ -32,7 +32,7 @@ def to_cpu(x : ModuleData, detach:bool=False) -> ModuleData:
 def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader, 
             save_path:Optional[str] = None, dataset_name:Optional[str] = None,
             device:Optional[str]=None, 
-            save_target:bool=False, save_prediction:bool=False) -> str:
+            save_input:bool=False, save_target:bool=False, save_prediction:bool=False) -> str:
     #dataloader Must be in CPU.
     
     original_mode = module.training
@@ -66,8 +66,10 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
                 intercepted_outputs = interceptor.outputs
                 intercepted_outputs = to_cpu(intercepted_outputs, detach=True)
                
-                chunk = {"inputs":x, "intercepted_outputs":intercepted_outputs, "index":chunk_index}
+                chunk = {"intercepted_outputs":intercepted_outputs, "index":chunk_index}
 
+                if save_input:
+                    chunk["input"] = x
                 if save_target:
                     chunk["target"] = y
                 if save_prediction:
@@ -83,6 +85,7 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
     info = {"dataset_name":dataset_name, 
             "n_chunk": len(dataloader),
             "n_sample": len(dataloader.dataset),
+            "has_input":save_input,
             "has_target":save_target,
             "has_prediction":save_prediction,
             "module_name":module.__class__.__name__}
