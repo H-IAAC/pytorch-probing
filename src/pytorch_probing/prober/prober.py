@@ -24,6 +24,7 @@ class Prober(Interceptor):
 
         self._probe_outputs = None
 
+    @property
     def outputs(self) -> Dict[str, Any]:
         return self._probe_outputs
 
