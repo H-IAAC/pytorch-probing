@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from pytorch_probing import collect, Interceptor
+from pytorch_probing import collect, Interceptor, CollectedDataset
 
 from .utils import TestModel, assert_tensor_almost_equal, TestDataset
 
@@ -84,3 +84,6 @@ class TestCollect(unittest.TestCase):
 
         assert chunk_intercepted_outputs.keys() == intercepted_outputs.keys()
         assert_array_almost_equal(chunk_intercepted_outputs["linear1"], intercepted_outputs["linear1"].numpy(), 5)
+
+        dataset = CollectedDataset(dataset_path)
+        assert_array_almost_equal(dataset[0]["linear1"], intercepted_outputs["linear1"].numpy()[0], 5)
