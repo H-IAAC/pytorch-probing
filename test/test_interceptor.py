@@ -57,9 +57,16 @@ class TestInterceptor(unittest.TestCase):
         intercepted_outputs = intercepted_model.outputs
 
         assert_tensor_almost_equal(linear1_output, intercepted_outputs["linear1"])
-
-
         assert_tensor_almost_equal(hidden_layers1_output, intercepted_outputs["hidden_layers.1"])
+
+        intercepted_model.reduce()
+
+        with Interceptor(self.test_model, paths) as intercepted_model:
+            intercepted_model(inputs)
+            intercepted_outputs = intercepted_model.outputs
+
+            assert_tensor_almost_equal(linear1_output, intercepted_outputs["linear1"])
+            assert_tensor_almost_equal(hidden_layers1_output, intercepted_outputs["hidden_layers.1"])
         
         
     def test_clear(self) -> None:
@@ -86,6 +93,10 @@ class TestInterceptor(unittest.TestCase):
         model_string = pprint.pformat(self.test_model)
 
         assert "Interceptor" not in model_string
+
+        with self.assertWarns(Warning):
+            inputs = torch.randn([10, self.input_size])
+            intercepted_model(inputs)
 
     def test_wrong_path(self) -> None:
         paths = ["linear1", "WRONG_PATH", "hidden_layers.1"]

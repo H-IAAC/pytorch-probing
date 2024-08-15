@@ -1,6 +1,24 @@
 import torch
+from torch.utils.data import Dataset, DataLoader
+import numpy as np
 from numpy.testing import assert_array_almost_equal
 
+class TestDataset(Dataset):
+    __test__ = False
+
+    def __init__(self, x_size, y_size, len) -> None:
+        super().__init__()
+
+        self._x_size = x_size
+        self._y_size = y_size
+        self._len = len
+
+    def __len__(self) -> int:
+        return self._len
+    
+    def __getitem__(self, idx:int):
+        return torch.empty(self._x_size).fill_(idx), torch.empty(self._y_size).fill_(idx)
+    
 class TestModel(torch.nn.Module):
     __test__ = False
     
@@ -35,7 +53,12 @@ class TestModel(torch.nn.Module):
         return 0
 
 def assert_tensor_almost_equal(tensor1:torch.Tensor, tensor2:torch.Tensor, decimal:int=5):
-    tensor1 = tensor1.detach().numpy()
-    tensor2 = tensor2.detach().numpy()
+
+    if not isinstance(tensor1, np.ndarray):
+        tensor1 = tensor1.detach().numpy()
+    if not isinstance(tensor2, np.ndarray):
+        tensor2 = tensor2.detach().numpy()
+
+    
 
     assert_array_almost_equal(tensor1, tensor2, decimal)
