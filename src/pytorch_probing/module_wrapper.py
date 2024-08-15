@@ -4,7 +4,7 @@ from typing import List
 
 import torch
 
-class InterceptorBase(torch.nn.Module, abc.ABC):
+class ModuleWrapper(torch.nn.Module, abc.ABC):
     def __init__(self, module: torch.nn.Module, member_names:List[str]) -> None:
         super().__init__()
 
@@ -12,6 +12,10 @@ class InterceptorBase(torch.nn.Module, abc.ABC):
         self._member_names = member_names
 
         self._reduced = False
+
+    def forward(self, *args, **kwargs):
+        self.check_reduced()
+        return self._module(*args, **kwargs)
 
     def reduce(self) -> torch.nn.Module:
         self._reduced = True

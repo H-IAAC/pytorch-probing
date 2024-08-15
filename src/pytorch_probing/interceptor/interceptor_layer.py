@@ -2,10 +2,9 @@ from typing import List, Tuple, Dict, Any
 
 import torch
 
-from .interceptor_base import InterceptorBase
+from pytorch_probing.module_wrapper import ModuleWrapper
 
-
-class InterceptorLayer(InterceptorBase):
+class InterceptorLayer(ModuleWrapper):
     def __init__(self, module, detach=True) -> None:
         super().__init__(module, ["_intercepted_output", "_detach"])
 
