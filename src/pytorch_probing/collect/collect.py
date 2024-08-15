@@ -1,6 +1,7 @@
-from typing import List, Tuple, Union, Optional, Dict
 import os
+import json
 import datetime
+from typing import List, Tuple, Union, Optional, Dict
 
 import torch
 from torch.utils.data import DataLoader
@@ -78,5 +79,15 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
                 np.savez(chunk_path, **chunk)
 
     module.train(original_mode)
+
+    info = {"dataset_name":dataset_name, 
+            "n_chunk": len(dataloader),
+            "n_sample": len(dataloader.dataset),
+            "has_target":save_target,
+            "has_prediction":save_prediction,
+            "module_name":module.__class__.__name__}
+    info_path = os.path.join(dataset_path, "info.json") 
+    with open(info_path, "w") as file:
+        json.dump(info, file)
 
     return dataset_path
