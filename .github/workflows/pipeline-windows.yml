@@ -24,7 +24,7 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install pytest
-        if [ -f setup.cfg ]; then python3 -m pip install . ; fi
+        python3 -m pip install .
         python3 -m pip install torch
 
     - name: Test with pytest
