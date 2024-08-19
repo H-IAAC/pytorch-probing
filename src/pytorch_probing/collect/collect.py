@@ -78,9 +78,9 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
                     pred_cpu = to_cpu(pred, detach=True)
                     chunk["prediction"] = pred_cpu                        
                 
-                chunk_path = os.path.join(dataset_path, str(chunk_index))
+                chunk_path = os.path.join(dataset_path, str(chunk_index)+".pt")
 
-                np.savez(chunk_path, **chunk)
+                torch.save(chunk, chunk_path)
 
     module.train(original_mode)
 

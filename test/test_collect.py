@@ -4,6 +4,7 @@ import shutil
 import json
 import math
 
+import torch
 from torch.utils.data import DataLoader
 import numpy as np
 from numpy.testing import assert_array_almost_equal
@@ -66,8 +67,8 @@ class TestCollect(unittest.TestCase):
         assert info["has_prediction"] == False
         assert info["module_name"] == "TestModel"
 
-        chunk_path = os.path.join(dataset_path, "0.npz")
-        chunk0 = np.load(chunk_path, allow_pickle=True)
+        chunk_path = os.path.join(dataset_path, "0.pt")
+        chunk0 = torch.load(chunk_path)
 
         keys = set(chunk0.keys())
         expected_keys = set(["intercepted_outputs", "index"])
@@ -80,10 +81,60 @@ class TestCollect(unittest.TestCase):
             interceptor(x)
             intercepted_outputs = interceptor.outputs
 
-        chunk_intercepted_outputs = chunk0["intercepted_outputs"].item()
+        chunk_intercepted_outputs = chunk0["intercepted_outputs"]
 
         assert chunk_intercepted_outputs.keys() == intercepted_outputs.keys()
-        assert_array_almost_equal(chunk_intercepted_outputs["linear1"], intercepted_outputs["linear1"].numpy(), 5)
+        assert_array_almost_equal(chunk_intercepted_outputs["linear1"], intercepted_outputs["linear1"], 5)
 
         dataset = CollectedDataset(dataset_path)
-        assert_array_almost_equal(dataset[0]["linear1"], intercepted_outputs["linear1"].numpy()[0], 5)
+        assert_array_almost_equal(dataset[0]["linear1"], intercepted_outputs["linear1"][0], 5)
+        assert type(dataset[0]["linear1"]) == torch.Tensor
+
+    def test_collect_all(self) -> None:
+        paths = ["linear1"]
+        dataset_path = collect(self.test_model, paths, self.test_dataloader, 
+                               self.save_path, self.dataset_name, 
+                               save_input=True, save_target=True, save_prediction=True)
+
+        assert dataset_path == os.path.join(self.save_path, self.dataset_name)
+
+        info_path = os.path.join(dataset_path, "info.json")
+        with open(info_path) as file:
+            info = json.load(file)
+
+        assert info["n_sample"] == self.n_sample
+        assert info["n_chunk"] == self.n_batch
+        assert info["dataset_name"] == self.dataset_name
+        assert info["has_input"] == True
+        assert info["has_target"] == True
+        assert info["has_prediction"] == True
+        assert info["module_name"] == "TestModel"
+
+        chunk_path = os.path.join(dataset_path, "0.pt")
+        chunk0 = torch.load(chunk_path)
+
+        keys = set(chunk0.keys())
+        expected_keys = set(["intercepted_outputs", "index", "target", "input", "prediction"])
+        assert keys == expected_keys
+        
+        assert chunk0["index"] == 0
+
+        x, y = next(iter(self.test_dataloader))
+        with Interceptor(self.test_model, paths) as interceptor:
+            interceptor(x)
+            intercepted_outputs = interceptor.outputs
+
+        chunk_intercepted_outputs = chunk0["intercepted_outputs"]
+
+        assert chunk_intercepted_outputs.keys() == intercepted_outputs.keys()
+        assert_array_almost_equal(chunk_intercepted_outputs["linear1"], intercepted_outputs["linear1"], 5)
+
+        dataset = CollectedDataset(dataset_path, True, True, True)
+        assert_array_almost_equal(dataset[0][0]["linear1"], intercepted_outputs["linear1"][0], 5)
+        
+        assert isinstance(dataset[0][0]["linear1"], torch.Tensor)
+        for i in range(1, 4):
+            assert isinstance(dataset[0][i], torch.Tensor)
+
+        dataset = CollectedDataset(dataset_path)
+        assert isinstance(dataset[0], dict)

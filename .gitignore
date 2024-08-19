@@ -1,4 +1,5 @@
 *.pth
+*.pt
 *.npz
 *.npy
 *.json

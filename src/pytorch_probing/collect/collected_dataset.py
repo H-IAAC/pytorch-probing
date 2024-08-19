@@ -71,22 +71,19 @@ class CollectedDataset(Dataset):
         chunk_index = index // self._sample_per_chunk
         sample_index_in_chunk = index % self._sample_per_chunk
 
-        chunk_path = os.path.join(self._dataset_path, str(chunk_index)+".npz")
-        chunk = np.load(chunk_path, allow_pickle=True)
+        chunk_path = os.path.join(self._dataset_path, str(chunk_index)+".pt")
+        chunk = torch.load(chunk_path)
 
         
         return_value = []
 
-        intercepted_outputs = chunk["intercepted_outputs"].item()
+        intercepted_outputs = chunk["intercepted_outputs"]
         return_value.append(get_element(intercepted_outputs, sample_index_in_chunk))
         
         names = ["target", "prediction", "input"]
         for name in names:
             if self._need_to_get[name]:
                 data = chunk[name]
-
-                if isinstance(data, np.ndarray) and data.shape == ():
-                    data = data.item()
                     
                 sample = get_element(data, sample_index_in_chunk)
 
