@@ -5,7 +5,20 @@ from typing import List
 import torch
 
 class ModuleWrapper(torch.nn.Module, abc.ABC):
+    '''
+    Wraps a PyTorch Module, enabling to add additional features and passing through original module members.
+    '''
+
     def __init__(self, module: torch.nn.Module, member_names:List[str]) -> None:
+        '''
+        ModuleWrapper init
+
+        Subclass must pass all the new members names, because of the passthrought feature.
+
+        Args:
+            module (torch.nn.Module): module being wrapped
+            member_names (List[str]): all the names of members of the Wrapper subclass
+        '''
         super().__init__()
 
         self._module = module
@@ -14,10 +27,19 @@ class ModuleWrapper(torch.nn.Module, abc.ABC):
         self._reduced = False
 
     def forward(self, *args, **kwargs):
-        self.check_reduced()
+        self._check_reduced()
         return self._module(*args, **kwargs)
 
+    @abc.abstractmethod
     def reduce(self) -> torch.nn.Module:
+        '''
+        Reduces the wrapped module to the original module.
+
+        May apply persistent alterations.
+
+        Returns:
+            torch.nn.Module: reduced module.
+        '''
         self._reduced = True
 
     def __getattr__(self, name):
@@ -32,6 +54,9 @@ class ModuleWrapper(torch.nn.Module, abc.ABC):
         else:
             return setattr(self._module, name, value)
         
-    def check_reduced(self):
+    def _check_reduced(self):
+        '''
+        Checks if reduced, raising a warning if true.
+        '''
         if self._reduced:
             warnings.warn("Model was reduced. Not intercepting results")

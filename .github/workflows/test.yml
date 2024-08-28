@@ -27,8 +27,7 @@ jobs:
         python3 -m pip install pytest
         python3 -m pip install .
 
-    - name: Test with pytest
+    - name: Tests
       run: |
-        cd ./test
         pytest
       shell: bash

@@ -7,7 +7,20 @@ import torch
 from pytorch_probing.module_wrapper import ModuleWrapper
 
 class InterceptorLayer(ModuleWrapper):
-    def __init__(self, module, detach=True) -> None:
+    '''
+    ModuleWrapper that intercepts a Module output.
+
+    Stores the intercepted output, avaiable in the "output" property.
+    '''
+
+    def __init__(self, module:torch.nn.Module, detach=True) -> None:
+        '''
+        InterceptorLayer init.
+
+        Args:
+            module (torch.nn.Module): Module to intercept the output.
+            detach (bool, optional): If should detach the intercepted output. Defaults to True.
+        '''
         super().__init__(module, ["_intercepted_output", "_detach"])
 
         self._intercepted_output : None | torch.Tensor | List[torch.Tensor] = None
@@ -15,10 +28,20 @@ class InterceptorLayer(ModuleWrapper):
 
     @property
     def output(self) -> None | torch.Tensor | List[torch.Tensor]:
+        '''
+        Gets the output.
+
+        Returns:
+            None | torch.Tensor | List[torch.Tensor]: Intercepted output. Is None if the output was 
+            cleared or no forwards were executed.
+        '''
         return self._intercepted_output
 
     def forward(self, *args, **kwargs):
-        self.check_reduced()
+        '''
+        Executes the module and intercepts its output.
+        '''
+        self._check_reduced()
 
         outputs : Tuple[torch.Tensor] | torch.Tensor = self._module(*args, **kwargs)
         
@@ -38,6 +61,9 @@ class InterceptorLayer(ModuleWrapper):
         return outputs
     
     def interceptor_clear(self):
+        '''
+        Clears the intercepted output.
+        '''
         self._intercepted_output = None
 
     def reduce(self):

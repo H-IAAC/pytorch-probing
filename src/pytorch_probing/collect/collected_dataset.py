@@ -11,25 +11,50 @@ import numpy as np
 
 from pytorch_probing.collect.collect import ModuleData
 
-def get_element(x:ModuleData, index:int) -> ModuleData:
+def _get_element(x:ModuleData, index:int) -> ModuleData:
+    '''
+    Get element from a complex data.
+
+    Args:
+        x (ModuleData): Data to get element from.
+        index (int): Index of the element.
+
+    Returns:
+        ModuleData: Data element.
+    '''
     if isinstance(x, torch.Tensor) or isinstance(x, np.ndarray):
         result = x[index]
 
     elif isinstance(x, list) or isinstance(x, tuple):
         result = []
         for element in x:
-            result.append(get_element(element, index))
+            result.append(_get_element(element, index))
     else:
         result = {}
         for key in x:
-            result[key] = get_element(x[key], index)
+            result[key] = _get_element(x[key], index)
 
     return result
 
 class CollectedDataset(Dataset):
-    def __init__(self, dataset_path, 
+    '''
+    Dataset to access collected data from pytorch_probing.collect
+    '''
+    def __init__(self, dataset_path:str, 
                  get_target=False, get_prediction=False,
                  get_input=False) -> None:
+        '''
+        CollectedDataset init.
+
+        Args:
+            dataset_path (str): Path of the collected dataset.
+            get_target (bool, optional): If should return the saved target, if avaiable. Defaults to False.
+            get_prediction (bool, optional): If should return the saved prediction, if avaiable. Defaults to False.
+            get_input (bool, optional): If should return the saved input, if avaiable. Defaults to False.
+
+        Raises:
+            ValueError: If get_* is true, but * is not avaiable in the collected dataset.
+        '''
         super().__init__()
         
         self._dataset_path = dataset_path
@@ -62,12 +87,34 @@ class CollectedDataset(Dataset):
 
     @property
     def name(self) -> str:
+        '''
+        Name of the saved dataset.
+        '''
         return self._name
 
     def __len__(self) -> int:
+        '''
+        Gets the dataset lenght.
+
+        Returns:
+            int: Dataset Lenght
+        '''
         return self._size
     
     def __getitem__(self, index:int) -> Tuple[torch.Tensor] | torch.Tensor:
+        '''
+        Gets a item from the dataset.
+
+        If any get_* is true, return a tuple with the elements in order:
+            (intercepted_outputs, target, prediction, input),
+        if all is false, return only the intercepted_outputs value.
+
+        Args:
+            index (int): Index of the item.
+
+        Returns:
+            Tuple[torch.Tensor] | torch.Tensor: Item.
+        '''
         chunk_index = index // self._sample_per_chunk
         sample_index_in_chunk = index % self._sample_per_chunk
 
@@ -78,14 +125,14 @@ class CollectedDataset(Dataset):
         return_value = []
 
         intercepted_outputs = chunk["intercepted_outputs"]
-        return_value.append(get_element(intercepted_outputs, sample_index_in_chunk))
+        return_value.append(_get_element(intercepted_outputs, sample_index_in_chunk))
         
         names = ["target", "prediction", "input"]
         for name in names:
             if self._need_to_get[name]:
                 data = chunk[name]
                     
-                sample = get_element(data, sample_index_in_chunk)
+                sample = _get_element(data, sample_index_in_chunk)
 
                 return_value.append(sample)
 

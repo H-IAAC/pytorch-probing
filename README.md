@@ -49,7 +49,7 @@ TODO Subir no Zenodo
 
 ## Authors
   
-- (2024-) Elton Cardoso do Nascimento: M. Eng. student, FEEC-Unicamp
+- (2024-) [EltonCN](https://github.com/EltonCN) : M. Eng. student, FEEC-Unicamp
   
 ## Acknowledgements
 

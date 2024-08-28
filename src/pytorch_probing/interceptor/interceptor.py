@@ -8,7 +8,37 @@ from pytorch_probing.module_wrapper import ModuleWrapper
 from .interceptor_layer import InterceptorLayer
 
 class Interceptor(ModuleWrapper):
-    def __init__(self, module, intercept_paths, detach=True) -> None:
+    '''
+    ModuleWrapper that intercepts intermediary outputs.
+
+    Stores the intercepted outputs, avaiable in the "outputs" property.
+
+    Examples
+    --------
+    >>> import torch
+    >>> from torch.nn import Sequential, Sigmoid, ReLU, Identity
+    >>> from pytorch_probing import Interceptor
+    >>> module = Sequential(Sequential(Sigmoid(), ReLU()), Identity())
+    >>> paths = ["0.0", "0"] #Sequential.Sigmoid, Sequential = Sequential.ReLU
+    >>> interceptor = Interceptor(module, paths)
+    >>> inputs = torch.arange(-1, 2, 1)
+    >>> _ = interceptor(inputs)
+    >>> print(interceptor.outputs)
+    {'0.0': tensor([0.2689, 0.5000, 0.7311]), '0': tensor([0.2689, 0.5000, 0.7311])}
+
+    '''
+    def __init__(self, module:torch.nn.Module, intercept_paths:List[str], detach:bool=True) -> None:
+        '''
+        _summary_
+
+        Args:
+            module (torch.nn.Module): Module to wrap.
+            intercept_paths (List[str]): Paths of the modules to intercept the outputs. Can be submodules as "my_module.submodule.subsubmodule".
+            detach (bool, optional):  If should detach the intercepted outputs. Defaults to True.
+
+        Raises:
+            ValueError: If there is no module with specified path.
+        '''
         super().__init__(module, ["_intercept_paths", "_interceptor_layers"])
 
         self._intercept_paths = intercept_paths
@@ -30,7 +60,10 @@ class Interceptor(ModuleWrapper):
             parent._modules[name] = interceptor_layer
 
     def forward(self, *args, **kwargs):
-        self.check_reduced()
+        '''
+        Executes the module and intercepts its intermediary outputs.
+        '''
+        self._check_reduced()
         return self._module(*args, **kwargs)
         
     def reduce(self) -> torch.nn.Module:
@@ -50,6 +83,13 @@ class Interceptor(ModuleWrapper):
     
     @property
     def outputs(self) -> Dict[str, torch.Tensor | List[torch.Tensor]]:
+        '''
+        Gets the intercepted outputs.
+
+        Returns:
+            Dict[str, torch.Tensor | List[torch.Tensor]]: Intercepted outputs, indexed by the module path. Is None if the output was 
+            cleared or no forwards were executed.
+        '''
         outputs = {}
         for path in self._intercept_paths:
             outputs[path] = self._interceptor_layers[path].output
@@ -57,6 +97,9 @@ class Interceptor(ModuleWrapper):
         return outputs
     
     def interceptor_clear(self):
+        '''
+        Clears the stored outputs.
+        '''
         for path in self._intercept_paths:
             self._interceptor_layers[path].interceptor_clear()
 
@@ -84,3 +127,4 @@ class Interceptor(ModuleWrapper):
     
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.reduce()
+
