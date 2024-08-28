@@ -16,3 +16,9 @@
    _examples/Collect
    _examples/Prober
    _examples/Interceptor
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Reference
+
+   auto_doc/pytorch_probing

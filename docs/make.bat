@@ -30,7 +30,8 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O% -j4
+sphinx-apidoc --force ../src -o auto_doc
+%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O% -j 4
 python3.11 tear_down.py
 goto end
 
