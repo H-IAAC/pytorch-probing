@@ -1,3 +1,6 @@
+[![](https://img.shields.io/pypi/v/pytorch_probing?style=for-the-badge)](https://pypi.org/project/pytorch_probing) [![](https://img.shields.io/pypi/l/pytorch_probing?style=for-the-badge)](https://github.com/H-IAAC/pytorch-probing/blob/main/LICENSE) [![](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/H-IAAC/pytorch-probing)
+
+
 # PyTorch Probing
 
 Python module for creating and using probes with PyTorch modules. 
