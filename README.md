@@ -13,7 +13,7 @@ See more projects from the group [here](https://github.com/brgsil/RepoOrganizer)
 
 - src: pytorch_probing source code
 - docs: documentation files
-- examples: examples of usage (see the [documentation](TODO))
+- examples: examples of usage (see the [documentation](https://h-iaac.github.io/pytorch-probing/))
 - test: test codes
 
 ## Installation / Usage
@@ -38,7 +38,7 @@ See more projects from the group [here](https://github.com/brgsil/RepoOrganizer)
 
 ### Usage
 
-See the [documentation](TODO) for usage and [examples](TODO).
+See the [documentation](https://h-iaac.github.io/pytorch-probing/) for usage and [examples](https://h-iaac.github.io/pytorch-probing/_build/html/Examples.html).
 
 ## Citation
 

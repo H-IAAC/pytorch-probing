@@ -8,7 +8,8 @@ for path in ["_examples", "auto_doc"]:
     except:
         pass
 
-try:
-    os.remove("README.md")
-except:
-    pass
+for path in ["README.md", "Examples.md"]:
+    try:
+        os.remove(path)
+    except:
+        pass

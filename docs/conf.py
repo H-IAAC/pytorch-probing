@@ -59,7 +59,6 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
 html_static_path = ['_static']
 
 source_suffix = ['.rst', '.md']
@@ -107,3 +106,4 @@ except:
     pass
 
 shutil.copyfile(os.path.join(project_root, "README.md"), os.path.join(project_root, "docs/README.md"))
+shutil.copyfile(os.path.join(project_root,"examples", "README.md"), os.path.join(project_root, "docs/Examples.md"))
