@@ -1,15 +1,14 @@
-import unittest
 import os
-import json
+import pathlib
 
-from torch import tensor
-
+from torch import tensor #Because of eval
 import numpy as np
 from testbook import testbook
 from testbook.client import TestbookNotebookClient
 from numpy.testing import assert_array_almost_equal
 
-examples_path = os.path.join(".", "../examples")
+tests_path = pathlib.Path(__file__).parent.resolve()
+examples_path = os.path.join(tests_path, "../examples")
 
 def ref_to_dict(ref):
     result = str(ref)
