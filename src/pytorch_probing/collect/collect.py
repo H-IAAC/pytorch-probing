@@ -25,6 +25,7 @@ def _to_cpu(x : ModuleData, detach:bool=False) -> ModuleData:
     Returns:
         ModuleData: CPU data.
     '''
+    result : ModuleData
     if isinstance(x, torch.Tensor):
         if detach:
             x = x.detach()
@@ -43,7 +44,7 @@ def _to_cpu(x : ModuleData, detach:bool=False) -> ModuleData:
 
 def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader, 
             save_path:Optional[str] = None, dataset_name:Optional[str] = None,
-            device:Optional[str]=None, 
+            device_name:Optional[str]=None, 
             save_input:bool=False, save_target:bool=False, save_prediction:bool=False) -> str:
     '''
     Executes a PyTorch module over a dataset, saving intermediary outputs.
@@ -54,7 +55,7 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
         dataloader (DataLoader): Dataloader with the data. Must return data in the CPU with format (input, output).
         save_path (Optional[str], optional): Directory to save the dataset. If 'None', uses the current path. Defaults to None.
         dataset_name (Optional[str], optional): Name of created dataset. If 'None', uses the current date-time. Defaults to None.
-        device (Optional[str], optional): Device to execute the module. If 'None', uses the device of the first module parameter. Defaults to None.
+        device_name (Optional[str], optional): Device to execute the module. If 'None', uses the device of the first module parameter. Defaults to None.
         save_input (bool, optional): If should save the dataset input. Defaults to False.
         save_target (bool, optional): If should save the dataset targets. Defaults to False.
         save_prediction (bool, optional): If should save the dataset prediction. Defaults to False.
@@ -78,16 +79,20 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
         os.makedirs(dataset_path)
     
 
-    if device is None:
+    if device_name is None:
         device = next(module.parameters()).device
     else:
-        device = torch.device(device)
+        device = torch.device(device_name)
         module = module.to(device)
+
+    n_sample = 0
 
     with Interceptor(module, paths) as interceptor:
         with torch.no_grad():
             for chunk_index, (x, y) in enumerate(dataloader):
                 x_device = x.to(device)
+
+                n_sample += len(x)
 
                 pred : torch.Tensor | Tuple[torch.Tensor] = interceptor(x_device)
 
@@ -112,7 +117,7 @@ def collect(module:torch.nn.Module, paths:List[str], dataloader:DataLoader,
 
     info = {"dataset_name":dataset_name, 
             "n_chunk": len(dataloader),
-            "n_sample": len(dataloader.dataset),
+            "n_sample": n_sample,
             "has_input":save_input,
             "has_target":save_target,
             "has_prediction":save_prediction,

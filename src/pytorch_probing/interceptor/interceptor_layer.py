@@ -43,7 +43,7 @@ class InterceptorLayer(ModuleWrapper):
         '''
         self._check_reduced()
 
-        outputs : Tuple[torch.Tensor] | torch.Tensor = self._module(*args, **kwargs)
+        outputs = self._module(*args, **kwargs)
         
         if isinstance(outputs, tuple):
             self._intercepted_output = []

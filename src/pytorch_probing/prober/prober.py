@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Dict, Any, cast, MutableMapping 
 
 import torch
 
@@ -29,7 +29,7 @@ class Prober(Interceptor):
 
     '''
     def __init__(self, module: torch.nn.Module, 
-                 probes:Dict[str, torch.nn.Module|None],
+                 probes:MutableMapping [str, torch.nn.Module|None],
                  return_in_forward:bool=True) -> None:
         '''
         Prober init.
@@ -43,24 +43,27 @@ class Prober(Interceptor):
         super().__init__(module, list(probes.keys()))
 
         self._member_names += ["_probes", "_return_in_forward", "_probe_outputs"]
-
+    
         for path in probes:
             if probes[path] is None:
                 probes[path] = torch.nn.Identity()
 
-        self._probes = torch.nn.ModuleDict(probes)
+        probes_ = cast(MutableMapping [str, torch.nn.Module], probes)
+
+        self._probes = torch.nn.ModuleDict(probes_)
+
+        self._probe_outputs : Dict[str, Any] | None = None
 
         self._return_in_forward = return_in_forward
 
-        self._probe_outputs = None
 
     @property
-    def outputs(self) -> Dict[str, Any]:
+    def outputs(self) -> Dict[str, Any] | None:
         '''
         Gets the probes outputs.
 
         Returns:
-            Dict[str, Any]: Probes outputs, indexed by the probed path. Is None if the output was 
+            Dict[str, Any] | None: Probes outputs, indexed by the probed path. Is None if the output was 
             cleared or no forwards were executed.
         '''
         return self._probe_outputs

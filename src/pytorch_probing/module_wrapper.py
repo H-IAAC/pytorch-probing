@@ -21,7 +21,7 @@ class ModuleWrapper(torch.nn.Module, abc.ABC):
         '''
         super().__init__()
 
-        self._module = module
+        self._module : torch.nn.Module = module
         self._member_names = member_names
 
         self._reduced = False
@@ -41,6 +41,8 @@ class ModuleWrapper(torch.nn.Module, abc.ABC):
             torch.nn.Module: reduced module.
         '''
         self._reduced = True
+
+        return self._module
 
     def __getattr__(self, name):
         try:

@@ -82,7 +82,7 @@ class Interceptor(ModuleWrapper):
         return self._module
     
     @property
-    def outputs(self) -> Dict[str, torch.Tensor | List[torch.Tensor]]:
+    def outputs(self) -> Dict[str, torch.Tensor | List[torch.Tensor]|None] | None:
         '''
         Gets the intercepted outputs.
 
@@ -90,6 +90,9 @@ class Interceptor(ModuleWrapper):
             Dict[str, torch.Tensor | List[torch.Tensor]]: Intercepted outputs, indexed by the module path. Is None if the output was 
             cleared or no forwards were executed.
         '''
+        if self._reduced:
+            return None
+
         outputs = {}
         for path in self._intercept_paths:
             outputs[path] = self._interceptor_layers[path].output
@@ -111,7 +114,9 @@ class Interceptor(ModuleWrapper):
         path_parts = path.split(".")
 
         for part in path_parts:
-            module = module._modules[part]
+            submodule = module._modules[part]
+            assert isinstance(submodule, torch.nn.Module)
+            module = submodule
 
         return module
 

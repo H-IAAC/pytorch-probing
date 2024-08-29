@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import json
 import math
+import typing
 from typing import Tuple
 
 import torch
@@ -11,6 +12,7 @@ import numpy as np
 
 from pytorch_probing.collect.collect import ModuleData
 
+@typing.no_type_check
 def _get_element(x:ModuleData, index:int) -> ModuleData:
     '''
     Get element from a complex data.
