@@ -37,10 +37,10 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           cd docs
-          python3 .\install_doc_requirements.py
+          python3 install_doc_requirements.py
           cd ..
       - name: Install pandoc
-        uses: pandoc/actions/setup@{main}
+        uses: pandoc/actions/setup@v1
       - name: Build documentation
         run: |
           cd docs
