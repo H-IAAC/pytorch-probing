@@ -20,14 +20,24 @@ def ref_to_dict(ref):
 
 @testbook(os.path.join(examples_path, "Collect.ipynb"), execute=True)
 def test_collect(tb: TestbookNotebookClient):
-    assert tb.cell_output_text("Check dataset files") == '''['.\\\\CollectExample\\\\0.pt',
- '.\\\\CollectExample\\\\1.pt',
- '.\\\\CollectExample\\\\2.pt',
- '.\\\\CollectExample\\\\3.pt',
- '.\\\\CollectExample\\\\4.pt',
- '.\\\\CollectExample\\\\5.pt',
- '.\\\\CollectExample\\\\6.pt',
- '.\\\\CollectExample\\\\7.pt']'''
+    dataset_files = tb.cell_output_text("Check dataset files")
+    dataset_files = eval(dataset_files)
+    dataset_files_set = set()
+    for file in dataset_files:
+        file = file.replace("\\", '-')
+        file = file.replace("/", '-')
+        dataset_files_set.add(file)
+
+    dataset_files_set_expected = {'.-CollectExample-0.pt', 
+                                  '.-CollectExample-1.pt', 
+                                  '.-CollectExample-2.pt', 
+                                  '.-CollectExample-3.pt', 
+                                  '.-CollectExample-4.pt', 
+                                  '.-CollectExample-5.pt', 
+                                  '.-CollectExample-6.pt', 
+                                  '.-CollectExample-7.pt'}
+
+    assert dataset_files_set == dataset_files_set_expected
     
     assert tb.cell_output_text("Load dataset") == "'CollectExample'"
 
