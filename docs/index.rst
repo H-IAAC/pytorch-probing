@@ -1,10 +1,11 @@
-.. mdinclude:: README.md
+.. include:: readme_link.rst
 
 .. toctree::
    :maxdepth: 2
    :caption: Getting started
    :hidden:
 
+   readme_link
    self
 
 
