@@ -30,7 +30,7 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-sphinx-apidoc --force ../src -o auto_doc
+sphinx-apidoc --force -e -E -M --templatedir=_templates  ../src -o auto_doc
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O% -j 4
 python3.11 tear_down.py
 goto end

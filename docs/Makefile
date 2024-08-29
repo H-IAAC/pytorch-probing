@@ -17,6 +17,6 @@ help:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@sphinx-apidoc --force ../src -o auto_doc
+	@sphinx-apidoc --force -e -E -M --templatedir=_templates  ../src -o auto_doc
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	@python tear_down.py

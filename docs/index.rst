@@ -20,5 +20,6 @@
 .. toctree::
    :maxdepth: 4
    :caption: Reference
+   :hidden:
 
    auto_doc/pytorch_probing
