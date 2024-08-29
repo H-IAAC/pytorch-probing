@@ -36,7 +36,11 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install .[doc_generation]
+          cd docs
+          python3 .\install_doc_requirements.py
+          cd ..
+      - name: Install pandoc
+        uses: pandoc/actions/setup@{main}
       - name: Build documentation
         run: |
           cd docs
